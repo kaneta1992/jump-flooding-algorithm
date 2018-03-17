@@ -2,7 +2,11 @@ package util
 
 import (
 	"image"
+	"image/draw"
 )
+
+// TODO:
+// buffersをJFA用の構造体に変更する
 
 type SwapBuffer struct {
 	buffers      [2]*image.RGBA
@@ -28,4 +32,9 @@ func (s *SwapBuffer) GetActiveBuffer() *image.RGBA {
 func (s *SwapBuffer) GetPrevBuffer() *image.RGBA {
 	index := (s.activeBuffer + 1) % 2
 	return s.buffers[index]
+}
+
+func (s *SwapBuffer) SetActiveBuffer(img image.Image) {
+	activeBuffer := s.GetActiveBuffer()
+	draw.Draw(activeBuffer, activeBuffer.Bounds(), img, image.ZP, draw.Src)
 }

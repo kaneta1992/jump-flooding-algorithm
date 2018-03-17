@@ -40,17 +40,16 @@ func main() {
 		}
 	}
 	swap_img.Set(64, 64, color.RGBA{255, 0, 255, 255})
+	swap.SetActiveBuffer(img)
 
 	out, _ := os.Create("out.png")
 	defer out.Close()
 
 	png.Encode(out, swap_img)
+	util.JumpFlooding(img)
 }
 
 // TODO:
-// 配列に画像を読み込む
-// 処理用のプライマリ、セカンダリバッファを用意する
-// 処理ごとにバッファを切り替える仕組みを作る
+// swapbufferをfloat配列で作り直す
 // JFAで最近のピクセルを計算する
 // ピクセルまでの距離を計算する
-// 保存
