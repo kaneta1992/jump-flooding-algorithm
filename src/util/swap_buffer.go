@@ -3,6 +3,7 @@ package util
 import (
 	"image"
 	"image/color"
+	"math"
 )
 
 type PixelInfo struct {
@@ -29,19 +30,25 @@ func (s *SwapBuffer) Swap() {
 	s.activeBuffer = (s.activeBuffer + 1) % 2
 }
 
+func (s *SwapBuffer) getIndex(x, y int) int {
+	clampedX := int(math.Min(math.Max(0.0, float64(x)), float64(s.width-1)))
+	clampedY := int(math.Min(math.Max(0.0, float64(y)), float64(s.height-1)))
+	return clampedY*s.width + clampedX
+}
+
 func (s *SwapBuffer) Get(x, y int) PixelInfo {
-	index := y*s.width + x
+	index := s.getIndex(x, y)
 	prev := (s.activeBuffer + 1) % 2
 	return s.buffers[prev][index]
 }
 
 func (s *SwapBuffer) Set(x, y int, info PixelInfo) {
-	index := y*s.width + x
+	index := s.getIndex(x, y)
 	s.buffers[s.activeBuffer][index] = info
 }
 
 func (s *SwapBuffer) SetNearest(x, y int, nearest *image.Point) {
-	index := y*s.width + x
+	index := s.getIndex(x, y)
 	s.buffers[s.activeBuffer][index].Nearest = nearest
 }
 
@@ -57,7 +64,7 @@ func (s *SwapBuffer) InitActiveBuffer(img image.Image) {
 		for x := 0; x < bounds.Max.X; x++ {
 			col := color2RGBA(img.At(x, y))
 			var nearest *image.Point
-			if col.A == 0 {
+			if col.A <= 128 {
 				nearest = nil
 			} else {
 				nearest = &image.Point{
