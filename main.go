@@ -50,6 +50,5 @@ func main() {
 }
 
 // TODO:
-// swapbufferをfloat配列で作り直す
 // JFAで最近のピクセルを計算する
 // ピクセルまでの距離を計算する
