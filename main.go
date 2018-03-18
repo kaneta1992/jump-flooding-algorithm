@@ -4,11 +4,8 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"image/draw"
 	"image/png"
 	"os"
-
-	"github.com/kaneta1992/jump-flooding-algorithm/src/util"
 )
 
 func rgba(r uint32, g uint32, b uint32, a uint32) (uint8, uint8, uint8, uint8) {
@@ -28,25 +25,24 @@ func main() {
 	fmt.Println(bounds.Max.X)
 	fmt.Println(bounds.Max.Y)
 
-	swap := util.NewSwapBuffer(bounds.Max.X, bounds.Max.Y)
-	swap_img := swap.GetActiveBuffer()
-	draw.Draw(swap_img, swap_img.Bounds(), &image.Uniform{color.RGBA{0, 0, 0, 0}}, image.ZP, draw.Src)
+	img2 := image.NewRGBA(image.Rect(0, 0, bounds.Max.X, bounds.Max.Y))
 
 	for y := 0; y < bounds.Max.Y; y++ {
 		for x := 0; x < bounds.Max.X; x++ {
 			col := img.At(x, y)
 			r, g, b, a := rgba(col.RGBA())
-			swap_img.Set(x, y, color.RGBA{uint8(float64(r) * 0.5), uint8(float64(g) * 0.5), uint8(float64(b) * 0.5), uint8(a)})
+			if r == 255 && g == 255 && b == 255 {
+				a = 0
+			}
+			img2.Set(x, y, color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)})
 		}
 	}
-	swap_img.Set(64, 64, color.RGBA{255, 0, 255, 255})
-	swap.SetActiveBuffer(img)
 
 	out, _ := os.Create("out.png")
 	defer out.Close()
 
-	png.Encode(out, swap_img)
-	util.JumpFlooding(img)
+	png.Encode(out, img2)
+	//util.JumpFlooding(img)
 }
 
 // TODO:
