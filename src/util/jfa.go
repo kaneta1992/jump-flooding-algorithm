@@ -46,13 +46,13 @@ func JumpFlooding(img image.Image) *SwapBuffer {
 	for level := maxLevel; level >= 0; level-- {
 		wg := &sync.WaitGroup{}
 		for y := 0; y < height; y++ {
-			for x := 0; x < width; x++ {
-				wg.Add(1)
-				go func(xx, yy int) {
-					searchNearestPixel(xx, yy, swap, level)
-					wg.Done()
-				}(x, y)
-			}
+			wg.Add(1)
+			go func(yy int) {
+				for x := 0; x < width; x++ {
+					searchNearestPixel(x, yy, swap, level)
+				}
+				wg.Done()
+			}(y)
 		}
 		wg.Wait()
 		swap.Swap()
