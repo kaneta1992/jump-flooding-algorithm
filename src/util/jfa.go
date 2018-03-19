@@ -3,6 +3,7 @@ package util
 import (
 	"image"
 	"math"
+	"sync"
 )
 
 func length2(x, y int) int {
@@ -39,11 +40,17 @@ func JumpFlooding(img image.Image) *SwapBuffer {
 	swap.Swap()
 	maxLevel := int(math.Log2(float64(bounds.Max.X))) - 1
 	for level := maxLevel; level >= 0; level-- {
+		wg := &sync.WaitGroup{}
 		for y := 0; y < height; y++ {
 			for x := 0; x < width; x++ {
-				searchNearestPixel(x, y, swap, level)
+				wg.Add(1)
+				go func(xx, yy int) {
+					searchNearestPixel(xx, yy, swap, level)
+					wg.Done()
+				}(x, y)
 			}
 		}
+		wg.Wait()
 		swap.Swap()
 	}
 	return swap
