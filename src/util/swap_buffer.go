@@ -54,7 +54,7 @@ func (s *SwapBuffer) SetNearest(x, y int, nearest *image.Point) {
 
 func color2RGBA(col color.Color) color.RGBA {
 	r, g, b, a := col.RGBA()
-	return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
+	return color.RGBA{uint8(r / 257), uint8(g / 257), uint8(b / 257), uint8(a / 257)}
 }
 
 func (s *SwapBuffer) InitActiveBuffer(img image.Image) {
@@ -64,7 +64,7 @@ func (s *SwapBuffer) InitActiveBuffer(img image.Image) {
 		for x := 0; x < bounds.Max.X; x++ {
 			col := color2RGBA(img.At(x, y))
 			var nearest *image.Point
-			if col.A <= 128 {
+			if col.A <= 254 {
 				nearest = nil
 			} else {
 				nearest = &image.Point{
