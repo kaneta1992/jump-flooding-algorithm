@@ -32,6 +32,8 @@ func main() {
 			if point == nil {
 				continue
 			}
+
+			// 外部のピクセルを内部の近傍ピクセルで着色する
 			var col color.RGBA
 			if pixel.Inside {
 				col = swap.Get(x, y).Color
