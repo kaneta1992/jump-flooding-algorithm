@@ -7,6 +7,7 @@ import (
 )
 
 type PixelInfo struct {
+	Inside  bool
 	Color   color.RGBA
 	Nearest *image.Point
 }
@@ -31,9 +32,14 @@ func (s *SwapBuffer) Swap() {
 }
 
 func (s *SwapBuffer) getIndex(x, y int) int {
+	clampedX, clampedY := s.ClampCoord(x, y)
+	return clampedY*s.width + clampedX
+}
+
+func (s *SwapBuffer) ClampCoord(x, y int) (int, int) {
 	clampedX := int(math.Min(math.Max(0.0, float64(x)), float64(s.width-1)))
 	clampedY := int(math.Min(math.Max(0.0, float64(y)), float64(s.height-1)))
-	return clampedY*s.width + clampedX
+	return clampedX, clampedY
 }
 
 func (s *SwapBuffer) Get(x, y int) PixelInfo {
@@ -63,18 +69,10 @@ func (s *SwapBuffer) InitActiveBuffer(img image.Image) {
 	for y := 0; y < bounds.Max.Y; y++ {
 		for x := 0; x < bounds.Max.X; x++ {
 			col := color2RGBA(img.At(x, y))
-			var nearest *image.Point
-			if col.A <= 254 {
-				nearest = nil
-			} else {
-				nearest = &image.Point{
-					X: x,
-					Y: y,
-				}
-			}
 			pixel := PixelInfo{
+				Inside:  col.A >= 254,
 				Color:   col,
-				Nearest: nearest,
+				Nearest: nil,
 			}
 			s.Set(x, y, pixel)
 		}
