@@ -22,7 +22,7 @@ func searchNearestPixel(x, y int, swap *SwapBuffer, level int) {
 			pixel := swap.Get(sampleX, sampleY)
 			sampleDist := minDistance
 			var nearestX, nearestY int
-			if pixel.Inside {
+			if newPixel.Inside != pixel.Inside {
 				nearestX = sampleX
 				nearestY = sampleY
 				sampleDist = length2(sampleX-x, sampleY-y)
@@ -33,7 +33,6 @@ func searchNearestPixel(x, y int, swap *SwapBuffer, level int) {
 			}
 			if sampleDist < minDistance {
 				minDistance = sampleDist
-				newPixel.Color = swap.Get(nearestX, nearestY).Color
 				newPixel.Nearest = &image.Point{
 					X: nearestX,
 					Y: nearestY,

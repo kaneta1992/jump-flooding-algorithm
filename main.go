@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"image/png"
 	"os"
 
@@ -26,8 +27,17 @@ func main() {
 	img2 := image.NewRGBA(image.Rect(0, 0, bounds.Max.X, bounds.Max.Y))
 	for y := 0; y < bounds.Max.Y; y++ {
 		for x := 0; x < bounds.Max.X; x++ {
-			point := swap.Get(x, y).Nearest
-			col := swap.Get(point.X, point.Y).Color
+			pixel := swap.Get(x, y)
+			point := pixel.Nearest
+			if point == nil {
+				continue
+			}
+			var col color.RGBA
+			if pixel.Inside {
+				col = swap.Get(x, y).Color
+			} else {
+				col = swap.Get(point.X, point.Y).Color
+			}
 			img2.Set(x, y, col)
 		}
 	}
