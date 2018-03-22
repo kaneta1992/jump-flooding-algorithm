@@ -46,7 +46,22 @@ func main() {
 	out, _ := os.Create("out.png")
 	defer out.Close()
 	png.Encode(out, img2)
-}
 
-// TODO:
-// ピクセルまでの距離を計算する
+	// TODO: ↓のようにしたい
+	// file, _ := os.Open("./test.png")
+	// defer file.Close()
+	// img, _, err := image.Decode(file)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// bounds := img.Bounds()
+	// fmt.Println(bounds.Max.X)
+	// fmt.Println(bounds.Max.Y)
+
+	// jfa := jfa.NewJFA(img)
+	// sdfImage := jfa.calcSDF()
+
+	// out, _ := os.Create("out.png")
+	// defer out.Close()
+	// png.Encode(out, img2)
+}
