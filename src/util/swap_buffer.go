@@ -31,6 +31,10 @@ func (s *SwapBuffer) Swap() {
 	s.activeBuffer = (s.activeBuffer + 1) % 2
 }
 
+func (s *SwapBuffer) getSize() (int, int) {
+	return s.width, s.height
+}
+
 func (s *SwapBuffer) getIndex(x, y int) int {
 	clampedX, clampedY := s.ClampCoord(x, y)
 	return clampedY*s.width + clampedX

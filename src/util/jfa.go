@@ -3,10 +3,15 @@ package util
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"math"
 	"sync"
 	"time"
 )
+
+type JFA struct {
+	buffer *SwapBuffer
+}
 
 func length2(x, y int) int {
 	return x*x + y*y
@@ -46,14 +51,9 @@ func searchNearestPixel(x, y int, swap *SwapBuffer, level int) {
 	swap.Set(x, y, currentPixel)
 }
 
-func JumpFlooding(img image.Image) *SwapBuffer {
-	bounds := img.Bounds()
-	width := bounds.Max.X
-	height := bounds.Max.Y
-	swap := NewSwapBuffer(width, height)
-	swap.InitActiveBuffer(img)
-	swap.Swap()
-	maxLevel := int(math.Log2(float64(bounds.Max.X))) - 1
+func jumpFloodingAlgorithm(buffer *SwapBuffer) {
+	width, height := buffer.getSize()
+	maxLevel := int(math.Log2(float64(width))) - 1
 	beforeAt := time.Now()
 
 	for level := maxLevel; level >= 0; level-- {
@@ -62,15 +62,49 @@ func JumpFlooding(img image.Image) *SwapBuffer {
 			wg.Add(1)
 			go func(yy int) {
 				for x := 0; x < width; x++ {
-					searchNearestPixel(x, yy, swap, level)
+					searchNearestPixel(x, yy, buffer, level)
 				}
 				wg.Done()
 			}(y)
 		}
 		wg.Wait()
-		swap.Swap()
+		buffer.Swap()
 	}
 	afterAt := time.Now()
 	fmt.Println(afterAt.Sub(beforeAt).Nanoseconds())
-	return swap
+}
+
+func NewJFA(img image.Image) *JFA {
+	bounds := img.Bounds()
+	jfa := &JFA{
+		buffer: NewSwapBuffer(bounds.Max.X, bounds.Max.Y),
+	}
+	jfa.buffer.InitActiveBuffer(img)
+	jfa.buffer.Swap()
+	jumpFloodingAlgorithm(jfa.buffer)
+	return jfa
+}
+
+func (j *JFA) CalcVoronol() *image.RGBA {
+	width, height := j.buffer.getSize()
+	img := image.NewRGBA(image.Rect(0, 0, width, height))
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			pixel := j.buffer.Get(x, y)
+			point := pixel.Nearest
+			if point == nil {
+				continue
+			}
+
+			// 外部のピクセルを内部の近傍ピクセルで着色する
+			var col color.RGBA
+			if pixel.Inside {
+				col = j.buffer.Get(x, y).Color
+			} else {
+				col = j.buffer.Get(point.X, point.Y).Color
+			}
+			img.Set(x, y, col)
+		}
+	}
+	return img
 }
