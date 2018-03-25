@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	file, _ := os.Open("./test.png")
+	file, _ := os.Open("./test2.png")
 	defer file.Close()
 	img, _, err := image.Decode(file)
 	if err != nil {
@@ -21,9 +21,10 @@ func main() {
 	fmt.Println(bounds.Max.Y)
 
 	jfa := util.NewJFA(img)
-	voronoiImage := jfa.CalcVoronol()
+	// voronoiImage := jfa.CalcVoronol()
+	sdfImage := jfa.CalcSDF(8.0)
 
-	out, _ := os.Create("out.png")
+	out, _ := os.Create("sdf2.png")
 	defer out.Close()
-	png.Encode(out, voronoiImage)
+	png.Encode(out, sdfImage)
 }
