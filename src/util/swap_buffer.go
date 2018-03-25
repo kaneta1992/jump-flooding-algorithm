@@ -9,6 +9,7 @@ import (
 type PixelInfo struct {
 	Inside  bool
 	Color   color.RGBA
+	Coord   image.Point
 	Nearest *image.Point
 }
 
@@ -76,6 +77,7 @@ func (s *SwapBuffer) InitActiveBuffer(img image.Image) {
 			pixel := PixelInfo{
 				Inside:  col.A >= 254,
 				Color:   col,
+				Coord:   image.Point{X: x, Y: y},
 				Nearest: nil,
 			}
 			s.Set(x, y, pixel)

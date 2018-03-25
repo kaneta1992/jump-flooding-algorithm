@@ -85,26 +85,34 @@ func NewJFA(img image.Image) *JFA {
 	return jfa
 }
 
-func (j *JFA) CalcVoronol() *image.RGBA {
+func (j *JFA) createImageWithEachPixel(insideFunction, outsideFunction, hasNotNearestFunction func(pixel PixelInfo) color.RGBA) *image.RGBA {
 	width, height := j.buffer.getSize()
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
 			pixel := j.buffer.Get(x, y)
-			point := pixel.Nearest
-			if point == nil {
-				continue
-			}
-
-			// 外部のピクセルを内部の近傍ピクセルで着色する
 			var col color.RGBA
+			if pixel.Nearest == nil {
+				col = hasNotNearestFunction(pixel)
+			}
 			if pixel.Inside {
-				col = j.buffer.Get(x, y).Color
+				col = insideFunction(pixel)
 			} else {
-				col = j.buffer.Get(point.X, point.Y).Color
+				col = outsideFunction(pixel)
 			}
 			img.Set(x, y, col)
 		}
 	}
 	return img
+}
+
+func (j *JFA) CalcVoronol() *image.RGBA {
+	return j.createImageWithEachPixel(func(pixel PixelInfo) color.RGBA {
+		return pixel.Color
+	}, func(pixel PixelInfo) color.RGBA {
+		nearest := pixel.Nearest
+		return j.buffer.Get(nearest.X, nearest.Y).Color
+	}, func(pixel PixelInfo) color.RGBA {
+		return color.RGBA{}
+	})
 }
