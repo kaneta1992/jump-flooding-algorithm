@@ -122,8 +122,10 @@ func (j *JFA) createImageWithEachPixel(insideFunction, outsideFunction, hasNotNe
 
 func (j *JFA) CalcVoronol() *image.RGBA {
 	return j.createImageWithEachPixel(func(pixel PixelInfo) color.RGBA {
+		// 内部はピクセルの色をそのまま出力
 		return pixel.Color
 	}, func(pixel PixelInfo) color.RGBA {
+		// 外部は近傍ピクセルの色を出力
 		nearest := pixel.Nearest
 		return j.buffer.Get(nearest.X, nearest.Y).Color
 	}, func(pixel PixelInfo) color.RGBA {
@@ -134,11 +136,13 @@ func (j *JFA) CalcVoronol() *image.RGBA {
 func (j *JFA) CalcSDF(maxDistance float64) *image.RGBA {
 	return j.createImageWithEachPixel(func(pixel PixelInfo) color.RGBA {
 		dist := distance(*pixel.Nearest, pixel.Coord)
+		// 内部のマッピングは0.0 ~ maxdistance = 127 ~ 0
 		distColor := uint8((1.0 - clamp(0.0, 1.0, dist/maxDistance)) * 127)
 		return color.RGBA{A: 255, R: distColor, G: distColor, B: distColor}
 	}, func(pixel PixelInfo) color.RGBA {
 		dist := distance(*pixel.Nearest, pixel.Coord)
-		distColor := 128 + uint8(clamp(0.0, 1.0, dist/maxDistance)*127)
+		// 外部のマッピングは0.0 ~ maxdistance = 127 ~ 255
+		distColor := 127 + uint8(clamp(0.0, 1.0, dist/maxDistance)*128)
 		return color.RGBA{A: 255, R: distColor, G: distColor, B: distColor}
 	}, func(pixel PixelInfo) color.RGBA {
 		return color.RGBA{}
