@@ -6,7 +6,7 @@ import (
 	"image/png"
 	"os"
 
-	"github.com/kaneta1992/jump-flooding-algorithm/src/util"
+	"github.com/kaneta1992/jump-flooding-algorithm/src/jfa"
 )
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 		fmt.Println(bounds.Max.X)
 		fmt.Println(bounds.Max.Y)
 
-		jfa := util.NewJFA(img)
+		jfa := jfa.NewJFA(img)
 		voronoiImage := jfa.CalcVoronol()
 		sdfImage := jfa.CalcSDF(8.0)
 
